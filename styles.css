@@ -1,0 +1,371 @@
+/**
+ * Dashboard de Tarefas - SOMOS CREATORS
+ * styles.css - Estilos compartilhados
+ */
+
+:root {
+  --primary-color: #ffd700;
+  --accent-color: #ffc107;
+  --text-color: #333333;
+  --bg-color: #ffffff;
+  --card-bg: #ffffff;
+  --priority-high: #ff4136;
+  --priority-medium: #ffdc00;
+  --priority-low: #2ecc40;
+  --hover-color: #f0f0f0;
+}
+
+/* Estilos Gerais */
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #f8f9fa;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header e Navegação */
+.app-header {
+  background-color: #222;
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+}
+
+.nav-link {
+  color: #ccc;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-link.active {
+  background-color: var(--primary-color);
+  color: #222;
+  font-weight: 500;
+}
+
+/* Cards e Containers */
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--card-bg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem 1.25rem;
+}
+
+.filter-card {
+  background-color: var(--card-bg);
+}
+
+.filtro-group {
+  min-width: 200px;
+}
+
+.timeline-container {
+  height: 800px;
+  background-color: var(--card-bg);
+}
+
+/* Botões e Controles */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+}
+
+.btn-accent {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #222;
+}
+
+.btn-accent:hover {
+  background-color: #e6ae00;
+  border-color: #e6ae00;
+  color: #222;
+}
+
+.btn-control {
+  background-color: #f0f0f0;
+  border-color: #e0e0e0;
+  color: #666;
+}
+
+.btn-control:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.timeline-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Estados e Indicadores */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.text-accent {
+  color: var(--accent-color) !important;
+}
+
+/* Cores de Prioridade */
+.priority-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.priority-high {
+  background-color: var(--priority-high);
+}
+
+.priority-medium {
+  background-color: var(--priority-medium);
+}
+
+.priority-low {
+  background-color: var(--priority-low);
+}
+
+.vis-item {
+  border-radius: 999px !important;
+  overflow: visible !important;
+  border-width: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+}
+
+.vis-item .vis-item-content {
+    border-radius: 999px !important; /* Garante arredondamento interno */
+    padding: 6px 16px;
+    overflow: visible !important;
+}
+
+.vis-item.task-priority-high {
+  background-color: var(--priority-high);
+  border-color: var(--priority-high);
+  color: white;
+  box-shadow: 0 2px 4px rgba(255, 65, 54, 0.2);
+}
+
+.vis-item.task-priority-medium {
+  background-color: var(--priority-medium);
+  border-color: var(--priority-medium);
+  color: #333;
+  box-shadow: 0 2px 4px rgba(255, 220, 0, 0.2);
+}
+
+.vis-item.task-priority-low {
+  background-color: var(--priority-low);
+  border-color: var(--priority-low);
+  color: white;
+  box-shadow: 0 2px 4px rgba(46, 204, 64, 0.2);
+}
+
+.vis-item .vis-item-content {
+    border-radius: 999px;
+    padding: 6px 16px;
+}  
+
+.vis-item.vis-selected {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.5);
+}
+
+.vis-time-axis .vis-text {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.vis-group-label {
+  font-weight: 600;
+}
+
+.vis-tooltip {
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border: none;
+  padding: 10px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Status de projeto */
+.projeto-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-align: center;
+  min-width: 100px;
+}
+
+.status-concluido {
+  background-color: var(--priority-low);
+  color: white;
+}
+
+.status-andamento {
+  background-color: var(--priority-medium);
+  color: #333;
+}
+
+.status-atrasado {
+  background-color: var(--priority-high);
+  color: white;
+}
+
+/* Cores para clientes */
+.cliente-sicredi {
+  color: #dc3545 !important;
+}
+.cliente-samsung {
+  color: #0d6efd !important;
+}
+.cliente-vivo {
+  color: #198754 !important;
+}
+.cliente-rd {
+  color: #ffc107 !important;
+}
+.cliente-americanas {
+  color: #0dcaf0 !important;
+}
+.cliente-oboticario {
+  color: #212529 !important;
+}
+.cliente-cogna {
+  color: #6c757d !important;
+}
+
+/* Legenda */
+.legend-container {
+  padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  background-color: var(--card-bg);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+/* Tabela de projetos */
+.table-container {
+  overflow-x: auto;
+}
+
+.table {
+  font-size: 0.9rem;
+}
+
+.table > thead {
+  background-color: #f8f9fa;
+}
+
+.table > tbody > tr:hover {
+  background-color: rgba(255, 220, 0, 0.05);
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1050;
+}
+
+/* Footer */
+.app-footer {
+  background-color: #222;
+  color: white;
+  padding: 1rem 0;
+  margin-top: auto;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .filtro-group {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-container {
+    height: 500px;
+  }
+
+  .timeline-controls {
+    flex-wrap: wrap;
+  }
+}
