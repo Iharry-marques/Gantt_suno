@@ -128,39 +128,43 @@ function preprocessarDados(item) {
   };
   processado.Priority = statusPriority[processado.PipelineStepTitle] || "medium";
 
-  // Separar grupo, subgrupo e membro com base no campo group_subgroup
+  // Lista de grupos principais válidos
+  const gruposPrincipais = ["Criação", "Mídia", "Produção", "Operações", "BI", "Estratégia"];
+  
+  // Inicializar valores
   let grupo = undefined;
-  let subgrupo = undefined;
-  let membro = undefined;
+  let caminhoCompleto = item.group_subgroup || "";
 
-  if (item.group_subgroup) {
-    const partes = item.group_subgroup.split("/").map(p => p.trim()).filter(Boolean);
-
-    if (partes.length > 0) {
-      grupo = partes[0];
-      if (partes.length === 2) {
-        membro = partes[1];
-      } else if (partes.length === 3) {
-        subgrupo = partes[1];
-        membro = partes[2];
-      } else if (partes.length > 3) {
-        subgrupo = partes[1];
-        membro = partes.slice(2).join(" / ");
-      }
-    }
-
-    // Corrigir o nome do grupo Produção
-    if (grupo === "Ana Luisa Andre") {
+  // Extrair o grupo principal do caminho completo
+  if (caminhoCompleto) {
+    // Caso especial para Ana Luisa Andre (sem barra, mas pertence a Produção)
+    if (caminhoCompleto.trim() === "Ana Luisa Andre") {
       grupo = "Produção";
-      subgrupo = null;
-      membro = "Ana Luisa Andre";
+    } else {
+      const partes = caminhoCompleto.split("/").map(p => p.trim());
+      
+      // Verificar se a primeira parte é um grupo principal reconhecido
+      if (partes.length > 0) {
+        if (gruposPrincipais.includes(partes[0])) {
+          grupo = partes[0];
+        } else if (partes[0] === "Bruno Prosperi") {
+          // Caso do "Bruno Prosperi" sem o prefixo "Criação"
+          grupo = "Criação";
+        } else if (partes[0] === "Carol") {
+          // Caso do "Carol" sem o prefixo "Operações"
+          grupo = "Operações";
+        } else {
+          console.warn(`Grupo não reconhecido: ${partes[0]} em ${caminhoCompleto}`);
+          grupo = "Outros";
+        }
+      }
     }
   }
 
+  // Armazenar grupo principal e caminho completo
   processado.TaskOwnerGroup = grupo;
-  processado.TaskOwnerSubgroup = subgrupo;
-  processado.TaskOwnerMember = membro;
-
+  processado.TaskOwnerFullPath = caminhoCompleto;
+  
   // Normalizar datas
   processado.RequestDate = processado.start || new Date().toISOString();
   processado.TaskClosingDate = processado.end || moment(processado.RequestDate).add(3, 'days').toISOString();
@@ -178,10 +182,15 @@ function preencherFiltros() {
   grupoPrincipalSelect.innerHTML = '<option value="todos">Todos</option>';
   clienteSelect.innerHTML = '<option value="todos">Todos</option>';
 
-  // Preencher grupos principais com base nos existentes nos dados
-  const gruposUnicos = [...new Set(appState.allData.map(t => t.TaskOwnerGroup).filter(Boolean))].sort();
-  gruposUnicos.forEach(grupo => {
-    grupoPrincipalSelect.add(new Option(grupo, grupo));
+  // Lista de grupos principais válidos
+  const gruposPrincipais = ["Criação", "Mídia", "Produção", "Operações", "BI", "Estratégia"];
+  
+  // Preencher grupos principais
+  gruposPrincipais.forEach(grupo => {
+    // Verificar se existe pelo menos uma tarefa neste grupo
+    if (appState.allData.some(t => t.TaskOwnerGroup === grupo)) {
+      grupoPrincipalSelect.add(new Option(grupo, grupo));
+    }
   });
 
   // Preencher clientes únicos
@@ -198,17 +207,82 @@ function atualizarSubgrupos() {
   const grupoSelecionado = document.getElementById("grupo-principal-select").value;
   const subgrupoSelect = document.getElementById("subgrupo-select");
 
+  // Limpar e adicionar a opção "Todos"
   subgrupoSelect.innerHTML = '<option value="todos">Todos</option>';
 
-  const filtrado = grupoSelecionado === "todos"
-    ? appState.allData
-    : appState.allData.filter(t => t.TaskOwnerGroup === grupoSelecionado);
+  // Se "todos" estiver selecionado, não mostrar subgrupos
+  if (grupoSelecionado === "todos") {
+    return;
+  }
 
-  const subgruposUnicos = [...new Set(filtrado.map(t => t.TaskOwnerSubgroup).filter(Boolean))].sort();
-
-  subgruposUnicos.forEach(sub => {
-    subgrupoSelect.add(new Option(sub, sub));
+  // Filtrar tarefas pelo grupo selecionado
+  const tarefasDoGrupo = appState.allData.filter(item => item.TaskOwnerGroup === grupoSelecionado);
+  
+  // Coletar todos os caminhos completos únicos para este grupo
+  const caminhos = new Set();
+  
+  tarefasDoGrupo.forEach(item => {
+    if (item.TaskOwnerFullPath) {
+      caminhos.add(item.TaskOwnerFullPath);
+    }
   });
+  
+  // Extrair subgrupos destes caminhos
+  const subgrupos = new Set();
+  const membrosDiretos = new Set();
+  
+  caminhos.forEach(caminho => {
+    // Ignorar o caso "Ana Luisa Andre" que é tratado como membro direto
+    if (caminho === "Ana Luisa Andre") {
+      membrosDiretos.add(caminho);
+      return;
+    }
+    
+    const partes = caminho.split("/").map(p => p.trim());
+    
+    // Se o caminho começa com o grupo principal
+    if (partes[0] === grupoSelecionado) {
+      // Remover o grupo principal para extrair o subgrupo
+      const subgrupo = partes.slice(1).join(" / ");
+      if (subgrupo) {
+        subgrupos.add(subgrupo);
+      }
+    } 
+    // Casos especiais sem prefixo de grupo principal
+    else if ((grupoSelecionado === "Criação" && partes[0] === "Bruno Prosperi") || 
+             (grupoSelecionado === "Operações" && partes[0] === "Carol")) {
+      // Todo o caminho é considerado subgrupo
+      subgrupos.add(caminho);
+    }
+  });
+  
+  // Adicionar subgrupos ao select
+  if (subgrupos.size > 0) {
+    // Adicionar cabeçalho de subgrupos
+    const headerOption = document.createElement("option");
+    headerOption.disabled = true;
+    headerOption.textContent = "--- Subgrupos ---";
+    subgrupoSelect.appendChild(headerOption);
+    
+    // Ordenar e adicionar subgrupos
+    [...subgrupos].sort().forEach(sub => {
+      subgrupoSelect.add(new Option(sub, sub));
+    });
+  }
+  
+  // Adicionar membros diretos (tarefas atribuídas diretamente a membros sem subgrupo)
+  if (membrosDiretos.size > 0) {
+    // Adicionar cabeçalho de membros diretos
+    const headerOption = document.createElement("option");
+    headerOption.disabled = true;
+    headerOption.textContent = "--- Membros Diretos ---";
+    subgrupoSelect.appendChild(headerOption);
+    
+    // Ordenar e adicionar membros diretos
+    [...membrosDiretos].sort().forEach(membro => {
+      subgrupoSelect.add(new Option(membro, membro));
+    });
+  }
 }
 
 // Início de atualizarFiltros() — (continua na Parte 3)
@@ -239,11 +313,34 @@ function atualizarFiltros() {
 
   // Filtro por subgrupo
   if (subgrupo !== "todos") {
-    appState.filteredData = appState.filteredData.filter(item =>
-      item.TaskOwnerSubgroup === subgrupo
-    );
+    appState.filteredData = appState.filteredData.filter(item => {
+      // Se for o caso especial "Ana Luisa Andre"
+      if (subgrupo === "Ana Luisa Andre" && item.TaskOwnerFullPath === "Ana Luisa Andre") {
+        return true;
+      }
+      
+      // Verificar se o caminho completo contém ou termina com o subgrupo selecionado
+      const fullPath = item.TaskOwnerFullPath;
+      if (fullPath) {
+        // Se o caminho começa com o grupo principal
+        if (fullPath.startsWith(grupo)) {
+          // Remover o grupo principal e verificar se o resto começa com o subgrupo
+          const restPath = fullPath.replace(`${grupo} / `, "");
+          return restPath === subgrupo || restPath.startsWith(`${subgrupo} / `);
+        } 
+        // Casos especiais sem prefixo de grupo principal
+        else if ((grupo === "Criação" && fullPath.startsWith("Bruno Prosperi")) || 
+                 (grupo === "Operações" && fullPath.startsWith("Carol"))) {
+          // Verificar se o caminho completo começa com o subgrupo
+          return fullPath === subgrupo || fullPath.startsWith(`${subgrupo} / `);
+        }
+      }
+      
+      return false;
+    });
   }
-  // Agrupar por membro e criar a timeline
+
+  // Agrupar por responsável e criar a timeline
   criarTimeline(appState.filteredData);
 }
 
@@ -259,7 +356,8 @@ function criarTimeline(dados) {
   }
 
   try {
-    const gruposMembros = [...new Set(dados.map(t => t.TaskOwnerMember).filter(Boolean))].sort();
+    // Agrupar por responsável real (não pelo caminho)
+    const responsaveis = [...new Set(dados.map(t => t.responsible).filter(Boolean))].sort();
 
     const items = new vis.DataSet(dados.map((item, idx) => {
       const startDate = moment(item.start);
@@ -273,7 +371,7 @@ function criarTimeline(dados) {
                   </div>`,
         start: startDate.toDate(),
         end: endDate.toDate(),
-        group: item.TaskOwnerMember,
+        group: item.responsible, // Agrupar por responsável real
         title: `
           <div class="timeline-tooltip">
             <h5>${item.name}</h5>
@@ -281,14 +379,14 @@ function criarTimeline(dados) {
             <p><strong>Responsável:</strong> ${item.responsible || "N/A"}</p>
             <p><strong>Período:</strong> ${startDate.format("DD/MM/YYYY")} - ${endDate.format("DD/MM/YYYY")}</p>
             <p><strong>Status:</strong> ${item.PipelineStepTitle || "N/A"}</p>
-            <p><strong>Grupo:</strong> ${item.TaskOwnerGroup || ""}${item.TaskOwnerSubgroup ? " / " + item.TaskOwnerSubgroup : ""}</p>
+            <p><strong>Grupo:</strong> ${item.TaskOwnerFullPath || "N/A"}</p>
           </div>`
       };
     }));
 
-    const visGroups = new vis.DataSet(gruposMembros.map(membro => ({
-      id: membro,
-      content: membro,
+    const visGroups = new vis.DataSet(responsaveis.map(resp => ({
+      id: resp,
+      content: resp,
     })));
 
     const options = {
