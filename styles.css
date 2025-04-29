@@ -369,3 +369,66 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* Estilos para hierarquia de grupos */
+select option[disabled] {
+  font-weight: 600;
+  background-color: #f8f9fa;
+}
+
+select option {
+  padding-left: 20px !important;
+}
+
+/* Ícones de grupos */
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+.group-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: bold;
+}
+
+/* Timeline items */
+.timeline-item-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 16px;
+}
+
+.priority-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.priority-dot.high { background-color: var(--priority-high); }
+.priority-dot.medium { background-color: var(--priority-medium); }
+.priority-dot.low { background-color: var(--priority-low); }
+
+/* Tooltip customizado */
+.timeline-tooltip {
+  max-width: 300px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.timeline-tooltip h5 {
+  margin: 0 0 8px 0;
+  color: var(--primary-color);
+}
