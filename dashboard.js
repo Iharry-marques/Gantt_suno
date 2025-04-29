@@ -1,11 +1,5 @@
-/**
- * Dashboard de Tarefas - SOMOS CREATORS
- * dashboard.js - Lógica principal para visualização por equipes
- */
 
-// Configurações globais e variáveis
 const CONFIG = {
-  // Mapeamento de cores por cliente para consistência na UI
   clientColors: {
     SICREDI: "danger",
     SAMSUNG: "primary",
@@ -16,8 +10,6 @@ const CONFIG = {
     COGNA: "secondary",
     ENGIE: "danger",
   },
-
-  // Mapeamento de campos entre API/JSON e nomes mais amigáveis
   fieldMapping: {
     client: "Cliente",
     name: "Título da Tarefa",
@@ -29,8 +21,6 @@ const CONFIG = {
     tipo: "Tipo de Tarefa",
     PipelineStepTitle: "Status",
   },
-
-  // Mapeamento de prioridade para classes CSS
   priorityClasses: {
     high: "task-priority-high",
     medium: "task-priority-medium",
@@ -38,14 +28,12 @@ const CONFIG = {
   },
 };
 
-// Armazenamento de dados e estado da aplicação
 let appState = {
-  allData: [], // Todos os dados carregados
-  filteredData: [], // Dados após aplicação de filtros
-  timeline: null, // Instância do objeto timeline
-  isLoading: false, // Flag para controle de carregamento
+  allData: [],
+  filteredData: [],
+  timeline: null,
+  isLoading: false,
   settings: {
-    // Configurações salvas
     dataSource: localStorage.getItem("dataSource") || "json",
     jsonUrl: localStorage.getItem("jsonUrl") || "dados.json",
     projectId: localStorage.getItem("projectId") || "monday-export",
@@ -54,79 +42,41 @@ let appState = {
   },
 };
 
-// Inicialização
 document.addEventListener("DOMContentLoaded", () => {
-  // Ajusta o ano no rodapé
   document.getElementById("ano-atual").textContent = new Date().getFullYear();
-
-  // Configura event listeners dos elementos de UI
   setupEventListeners();
-
-  // Carrega os dados
   carregarDados();
 });
 
-// Função para configurar todos os event listeners
 function setupEventListeners() {
-  // Botões da timeline
-  document
-    .getElementById("btn-anterior")
-    .addEventListener("click", () => moverTimeline(-7));
-  document
-    .getElementById("btn-hoje")
-    .addEventListener("click", () => irParaHoje());
-  document
-    .getElementById("btn-proximo")
-    .addEventListener("click", () => moverTimeline(7));
-  document
-    .getElementById("btn-zoom-out")
-    .addEventListener("click", () => ajustarZoom(0.7));
-  document
-    .getElementById("btn-zoom-in")
-    .addEventListener("click", () => ajustarZoom(1.3));
+  document.getElementById("btn-anterior")?.addEventListener("click", () => moverTimeline(-7));
+  document.getElementById("btn-hoje")?.addEventListener("click", () => irParaHoje());
+  document.getElementById("btn-proximo")?.addEventListener("click", () => moverTimeline(7));
+  document.getElementById("btn-zoom-out")?.addEventListener("click", () => ajustarZoom(0.7));
+  document.getElementById("btn-zoom-in")?.addEventListener("click", () => ajustarZoom(1.3));
+  document.getElementById("exportar-dados")?.addEventListener("click", exportarCSV);
 
-  // Botão de exportação
-  document
-    .getElementById("exportar-dados")
-    .addEventListener("click", exportarCSV);
+  document.getElementById("cliente-select")?.addEventListener("change", atualizarFiltros);
+  document.getElementById("periodo-select")?.addEventListener("change", atualizarFiltros);
+  document.getElementById("grupo-principal-select")?.addEventListener("change", () => {
+    atualizarSubgrupos();
+    atualizarFiltros();
+  });
+  document.getElementById("subgrupo-select")?.addEventListener("change", atualizarFiltros);
 
-  // Filtros
-  document
-    .getElementById("cliente-select")
-    .addEventListener("change", atualizarFiltros);
-  document
-    .getElementById("periodo-select")
-    .addEventListener("change", atualizarFiltros);
-  document
-    .getElementById("grupo-principal-select")
-    .addEventListener("change", () => {
-      atualizarSubgrupos();
-      atualizarFiltros();
-    });
-  document
-    .getElementById("subgrupo-select")
-    .addEventListener("change", atualizarFiltros);
-
-  // Configuração de tela cheia
   configurarEventoTelaCheia();
 }
 
-// Função principal para carregar dados
 async function carregarDados() {
   try {
     mostrarLoading(true);
-
-    // Determina a fonte de dados
     if (appState.settings.dataSource === "json") {
       await carregarDadosDeJSON();
-    } else if (appState.settings.dataSource === "bigquery") {
+    } else {
       await carregarDadosDeBigQuery();
     }
 
-    // Preenche os seletores de filtro
     preencherFiltros();
-
-    // Atualiza a visualização com todos os dados
     atualizarFiltros();
   } catch (error) {
     console.error("Erro ao carregar dados:", error);
@@ -136,68 +86,25 @@ async function carregarDados() {
   }
 }
 
-// Carrega dados de um arquivo JSON local
 async function carregarDadosDeJSON() {
   try {
     const response = await fetch(appState.settings.jsonUrl);
-
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
     const dadosOriginais = await response.json();
-
-    // Processa e armazena os dados
     appState.allData = dadosOriginais.map(preprocessarDados);
   } catch (error) {
     throw new Error(`Falha ao carregar dados do JSON: ${error.message}`);
   }
 }
 
-// Carrega dados do BigQuery - Implementação simulada para futuro
 async function carregarDadosDeBigQuery() {
-  // Esta função seria implementada para conectar com o BigQuery
-  // Por enquanto, carregamos o JSON local como fallback
   try {
-    mostrarNotificacao(
-      "Conectando ao BigQuery",
-      "Estabelecendo conexão...",
-      "info"
-    );
+    mostrarNotificacao("Conectando ao BigQuery", "Estabelecendo conexão...", "info");
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Simula uma consulta ao BigQuery
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Exemplo de consulta SQL que seria executada:
-    /*
-      const query = `
-        SELECT 
-          ClientNickname, 
-          TaskNumber, 
-          TaskTitle, 
-          RequestDate, 
-          TaskClosingDate, 
-          TaskOwnerDisplayName,
-          TaskOwnerGroupName,
-          TaskExecutionFunctionGroupName,
-          Priority
-        FROM 
-          \`${appState.settings.projectId}.${appState.settings.dataset}.${appState.settings.table}\`
-        WHERE 
-          RequestDate IS NOT NULL
-        LIMIT 1000
-      `;
-      */
-
-    // Por enquanto, carregamos o JSON local
     const response = await fetch(appState.settings.jsonUrl);
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
     const dadosOriginais = await response.json();
-
-    // Processa e armazena os dados
     appState.allData = dadosOriginais.map(preprocessarDados);
 
     mostrarNotificacao(
@@ -213,308 +120,210 @@ async function carregarDadosDeBigQuery() {
 function preprocessarDados(item) {
   const processado = { ...item };
 
-  // Mapeamento de prioridade
-  if (processado.PipelineStepTitle) {
-    const statusPriority = {
-      "Não iniciada": "low",
-      Backlog: "medium",
-      "Em Produção": "high",
-    };
-    processado.Priority = statusPriority[processado.PipelineStepTitle] || "medium";
-  }
+  // Mapear prioridade com base no status
+  const statusPriority = {
+    "Não iniciada": "low",
+    Backlog: "medium",
+    "Em Produção": "high",
+  };
+  processado.Priority = statusPriority[processado.PipelineStepTitle] || "medium";
 
-  // Processamento hierárquico dos grupos
-  if (processado.group_subgroup) {
-    const partes = processado.group_subgroup
-      .split(/\/|>>/) // Permite diferentes separadores
-      .map(p => p.trim())
-      .filter(p => p !== "");
+  // Separar grupo, subgrupo e membro com base no campo group_subgroup
+  let grupo = undefined;
+  let subgrupo = undefined;
+  let membro = undefined;
 
-    // Mapeamento de grupos principais
-    const gruposPrincipais = ["Criação", "BI", "Operações", "Produção", "Mídia"];
-    
-    // Encontrar o grupo principal
-    let grupoIndex = -1;
-    const grupoPrincipal = partes.find((p, index) => {
-      grupoIndex = index;
-      return gruposPrincipais.includes(p);
-    }) || "Outros";
+  if (item.group_subgroup) {
+    const partes = item.group_subgroup.split("/").map(p => p.trim()).filter(Boolean);
 
-    processado.TaskOwnerGroup = grupoPrincipal;
-    processado.TaskOwnerSubgroup = partes.slice(grupoIndex + 1).join(" / ");
+    if (partes.length > 0) {
+      grupo = partes[0];
+      if (partes.length === 2) {
+        membro = partes[1];
+      } else if (partes.length === 3) {
+        subgrupo = partes[1];
+        membro = partes[2];
+      } else if (partes.length > 3) {
+        subgrupo = partes[1];
+        membro = partes.slice(2).join(" / ");
+      }
+    }
 
-    // Caso especial para Produção
-    if (grupoPrincipal === "Produção" && partes.length === 1) {
-      processado.TaskOwnerSubgroup = partes[0];
+    // Corrigir o nome do grupo Produção
+    if (grupo === "Ana Luisa Andre") {
+      grupo = "Produção";
+      subgrupo = null;
+      membro = "Ana Luisa Andre";
     }
   }
 
-  // Normalização de datas
-  processado.RequestDate = processado.start ? processado.start : new Date().toISOString();
-  processado.TaskClosingDate = processado.end ? processado.end : moment(processado.RequestDate).add(3, 'days').toISOString();
+  processado.TaskOwnerGroup = grupo;
+  processado.TaskOwnerSubgroup = subgrupo;
+  processado.TaskOwnerMember = membro;
+
+  // Normalizar datas
+  processado.RequestDate = processado.start || new Date().toISOString();
+  processado.TaskClosingDate = processado.end || moment(processado.RequestDate).add(3, 'days').toISOString();
   processado.CurrentDueDate = processado.TaskClosingDate;
 
   return processado;
 }
-
-// Preenche os seletores de filtro com opções baseadas nos dados disponíveis
+// Preenche os selects de Grupo Principal e Cliente
 function preencherFiltros() {
   if (!appState.allData || appState.allData.length === 0) return;
 
-  // Lista fixa de grupos principais
-  const gruposPrincipais = ["Criação", "BI", "Operações", "Produção", "Mídia"];
-
-  // Preencher select de grupos principais
   const grupoPrincipalSelect = document.getElementById("grupo-principal-select");
+  const clienteSelect = document.getElementById("cliente-select");
+
   grupoPrincipalSelect.innerHTML = '<option value="todos">Todos</option>';
-  
-  gruposPrincipais.forEach(grupo => {
-    const option = document.createElement("option");
-    option.value = grupo;
-    option.textContent = grupo;
-    grupoPrincipalSelect.appendChild(option);
+  clienteSelect.innerHTML = '<option value="todos">Todos</option>';
+
+  // Preencher grupos principais com base nos existentes nos dados
+  const gruposUnicos = [...new Set(appState.allData.map(t => t.TaskOwnerGroup).filter(Boolean))].sort();
+  gruposUnicos.forEach(grupo => {
+    grupoPrincipalSelect.add(new Option(grupo, grupo));
   });
 
-  // Preencher select de clientes
-  const clientes = [...new Set(appState.allData
-    .map(t => t.client)
-    .filter(Boolean)
-  )].sort();
-  
-
-  const clienteSelect = document.getElementById("cliente-select");
-  clienteSelect.innerHTML = '<option value="todos">Todos</option>';
+  // Preencher clientes únicos
+  const clientes = [...new Set(appState.allData.map(t => t.client).filter(Boolean))].sort();
   clientes.forEach(cliente => {
-    const option = document.createElement("option");
-    option.value = cliente;
-    option.textContent = cliente;
-    clienteSelect.appendChild(option);
+    clienteSelect.add(new Option(cliente, cliente));
   });
 
   atualizarSubgrupos();
 }
 
+// Preenche o select de Subgrupo com base no Grupo selecionado
 function atualizarSubgrupos() {
-  const grupoPrincipalSelect = document.getElementById("grupo-principal-select");
+  const grupoSelecionado = document.getElementById("grupo-principal-select").value;
   const subgrupoSelect = document.getElementById("subgrupo-select");
-  if (!grupoPrincipalSelect || !subgrupoSelect || !appState.allData) return;
 
-  const grupoPrincipal = grupoPrincipalSelect.value;
   subgrupoSelect.innerHTML = '<option value="todos">Todos</option>';
-  if (grupoPrincipal === "todos") return;
 
-  // Coletar hierarquia completa
-  const subgruposHierarquia = appState.allData
-    .filter(item => item.TaskOwnerGroup === grupoPrincipal)
-    .map(item => ({
-      path: item.TaskOwnerSubgroup ? 
-        `${item.TaskOwnerGroup} / ${item.TaskOwnerSubgroup}` : 
-        item.TaskOwnerGroup,
-      parts: item.TaskOwnerSubgroup ? 
-        [`${item.TaskOwnerGroup}`, ...item.TaskOwnerSubgroup.split(" / ")] : 
-        [item.TaskOwnerGroup]
-    }));
+  const filtrado = grupoSelecionado === "todos"
+    ? appState.allData
+    : appState.allData.filter(t => t.TaskOwnerGroup === grupoSelecionado);
 
-  // Construir estrutura de árvore
-  const tree = {};
-  subgruposHierarquia.forEach(({ path, parts }) => {
-    let currentLevel = tree;
-    parts.forEach((part, index) => {
-      if (!currentLevel[part]) {
-        currentLevel[part] = {
-          name: part,
-          children: {},
-          fullPath: parts.slice(0, index + 1).join(" / ")
-        };
-      }
-      currentLevel = currentLevel[part].children;
-    });
-  });
+  const subgruposUnicos = [...new Set(filtrado.map(t => t.TaskOwnerSubgroup).filter(Boolean))].sort();
 
-  // Função recursiva para criar opções
-  const createOptions = (node, depth = 0) => {
-    const option = document.createElement("option");
-    option.value = node.fullPath;
-    option.textContent = `${' '.repeat(depth)}↳ ${node.name}`;
-    
-    // Desabilitar nós não folha
-    if (Object.keys(node.children).length > 0) {
-      option.disabled = true;
-      option.style.fontWeight = "600";
-      option.style.backgroundColor = "#f8f9fa";
-    }
-    
-    subgrupoSelect.appendChild(option);
-    
-    // Processar filhos
-    Object.values(node.children).forEach(child => {
-      createOptions(child, depth + 1);
-    });
-  };
-
-  // Adicionar opções baseadas na árvore
-  Object.values(tree).forEach(rootNode => {
-    createOptions(rootNode);
+  subgruposUnicos.forEach(sub => {
+    subgrupoSelect.add(new Option(sub, sub));
   });
 }
 
-// Atualiza os filtros e regenera visualizações
+// Início de atualizarFiltros() — (continua na Parte 3)
 function atualizarFiltros() {
   if (!appState.allData || appState.allData.length === 0) return;
 
-  const clienteSelect = document.getElementById("cliente-select");
-  const periodoSelect = document.getElementById("periodo-select");
-  const grupoPrincipalSelect = document.getElementById("grupo-principal-select");
-  const subgrupoSelect = document.getElementById("subgrupo-select");
+  const cliente = document.getElementById("cliente-select").value;
+  const dias = parseInt(document.getElementById("periodo-select").value);
+  const grupo = document.getElementById("grupo-principal-select").value;
+  const subgrupo = document.getElementById("subgrupo-select").value;
 
-  const cliente = clienteSelect.value;
-  const dias = parseInt(periodoSelect.value);
-  const grupoPrincipal = grupoPrincipalSelect.value;
-  const subgrupo = subgrupoSelect.value;
+  const limite = moment().subtract(dias, "days");
 
-  // Filtragem por data
-  const limite = moment().subtract(dias, 'days');
+  // Filtro base: por período
   appState.filteredData = appState.allData.filter(item => {
     return moment(item.start).isSameOrAfter(limite);
   });
 
-  // Aplicar filtros adicionais
+  // Filtro por cliente
   if (cliente !== "todos") {
-    appState.filteredData = appState.filteredData.filter(
-      item => item.client === cliente
-    );
+    appState.filteredData = appState.filteredData.filter(item => item.client === cliente);
   }
 
-  if (grupoPrincipal !== "todos") {
-    appState.filteredData = appState.filteredData.filter(
-      item => item.TaskOwnerGroup === grupoPrincipal
-    );
+  // Filtro por grupo
+  if (grupo !== "todos") {
+    appState.filteredData = appState.filteredData.filter(item => item.TaskOwnerGroup === grupo);
   }
 
+  // Filtro por subgrupo
   if (subgrupo !== "todos") {
-    appState.filteredData = appState.filteredData.filter(item => {
-      const fullPath = item.TaskOwnerSubgroup 
-        ? `${item.TaskOwnerGroup} / ${item.TaskOwnerSubgroup}`
-        : item.TaskOwnerGroup;
-      
-      return fullPath === subgrupo;
-    });
+    appState.filteredData = appState.filteredData.filter(item =>
+      item.TaskOwnerSubgroup === subgrupo
+    );
   }
-
+  // Agrupar por membro e criar a timeline
   criarTimeline(appState.filteredData);
 }
 
 function criarTimeline(dados) {
   const container = document.getElementById("timeline");
-  if (!container) return;
+  if (!container || !dados) return;
+
   container.innerHTML = "";
 
-  if (!dados || dados.length === 0) {
+  if (dados.length === 0) {
     container.innerHTML = '<div class="alert alert-info m-3">Nenhuma tarefa encontrada</div>';
     return;
   }
 
   try {
-    // Construir grupos hierárquicos
-    const grupos = dados.reduce((acc, item) => {
-      const grupoPath = item.TaskOwnerSubgroup ?
-        `${item.TaskOwnerGroup} / ${item.TaskOwnerSubgroup}` :
-        item.TaskOwnerGroup;
-      
-      if (!acc.includes(grupoPath)) {
-        acc.push(grupoPath);
-      }
-      return acc;
-    }, []).sort((a, b) => {
-      // Ordenar por grupos principais definidos
-      const gruposOrdenacao = ["Criação", "BI", "Operações", "Produção", "Mídia"];
-      const grupoA = a.split(" / ")[0];
-      const grupoB = b.split(" / ")[0];
-      return gruposOrdenacao.indexOf(grupoA) - gruposOrdenacao.indexOf(grupoB);
-    });
+    const gruposMembros = [...new Set(dados.map(t => t.TaskOwnerMember).filter(Boolean))].sort();
 
-    // Criar items da timeline
-    const items = new vis.DataSet(dados.map((item, i) => {
-      const startDate = moment(item.start).isValid() ? 
-        moment(item.start) : 
-        moment().add(1, 'days');
-      
-      const endDate = moment(item.end).isValid() ?
-        moment(item.end) :
-        startDate.clone().add(3, 'days');
+    const items = new vis.DataSet(dados.map((item, idx) => {
+      const startDate = moment(item.start);
+      const endDate = item.end ? moment(item.end) : startDate.clone().add(3, "days");
 
       return {
-        id: i,
+        id: idx,
         content: `<div class="timeline-item-content" title="${item.name}">
-                    <span class="priority-dot ${item.Priority}"></span>
-                    ${item.name.substring(0, 20)}${item.name.length > 20 ? '...' : ''}
+                    <span class="priority-dot ${CONFIG.priorityClasses[item.Priority]}"></span>
+                    ${item.name.substring(0, 25)}${item.name.length > 25 ? "..." : ""}
                   </div>`,
         start: startDate.toDate(),
         end: endDate.toDate(),
-        group: item.TaskOwnerSubgroup ? 
-          `${item.TaskOwnerGroup} / ${item.TaskOwnerSubgroup}` : 
-          item.TaskOwnerGroup,
+        group: item.TaskOwnerMember,
         title: `
           <div class="timeline-tooltip">
             <h5>${item.name}</h5>
-            <p><strong>Cliente:</strong> ${item.client || 'N/A'}</p>
-            <p><strong>Responsável:</strong> ${item.responsible || 'N/A'}</p>
-            <p><strong>Período:</strong> ${startDate.format('DD/MM/YYYY')} - ${endDate.format('DD/MM/YYYY')}</p>
-            <p><strong>Status:</strong> ${item.PipelineStepTitle}</p>
-            <p><strong>Grupo:</strong> ${item.TaskOwnerGroup} ${item.TaskOwnerSubgroup ? '/ ' + item.TaskOwnerSubgroup : ''}</p>
-          </div>
-        `,
-        className: `timeline-item ${CONFIG.priorityClasses[item.Priority]}`
+            <p><strong>Cliente:</strong> ${item.client || "N/A"}</p>
+            <p><strong>Responsável:</strong> ${item.responsible || "N/A"}</p>
+            <p><strong>Período:</strong> ${startDate.format("DD/MM/YYYY")} - ${endDate.format("DD/MM/YYYY")}</p>
+            <p><strong>Status:</strong> ${item.PipelineStepTitle || "N/A"}</p>
+            <p><strong>Grupo:</strong> ${item.TaskOwnerGroup || ""}${item.TaskOwnerSubgroup ? " / " + item.TaskOwnerSubgroup : ""}</p>
+          </div>`
       };
     }));
 
-    // Configurar grupos
-    const visGroups = new vis.DataSet(grupos.map(grupo => ({
-      id: grupo,
-      content: `
-        <div class="group-header">
-          <span class="group-icon">${grupo.split(' / ')[0].charAt(0)}</span>
-          ${grupo}
-        </div>
-      `,
-      className: `group-${grupo.toLowerCase().replace(/ /g, '-').replace(/[^a-z-]/g, '')}`
+    const visGroups = new vis.DataSet(gruposMembros.map(membro => ({
+      id: membro,
+      content: membro,
     })));
 
-    // Configurações da timeline
     const options = {
-      orientation: 'top',
+      orientation: "top",
       stack: true,
       margin: { item: 10 },
-      zoomMin: 1000 * 60 * 60 * 24 * 7, // 1 semana
-      zoomMax: 1000 * 60 * 60 * 24 * 180, // 6 meses
-      start: moment().subtract(1, 'weeks'),
-      end: moment().add(2, 'weeks'),
+      zoomMin: 1000 * 60 * 60 * 24 * 7,
+      zoomMax: 1000 * 60 * 60 * 24 * 180,
+      start: moment().subtract(1, "weeks"),
+      end: moment().add(2, "weeks"),
       groupOrder: (a, b) => a.content.localeCompare(b.content),
       horizontalScroll: true,
       verticalScroll: true,
-      height: '800px'
+      height: "800px"
     };
 
     appState.timeline = new vis.Timeline(container, items, visGroups, options);
     appState.timeline.fit();
-
   } catch (error) {
     console.error("Erro ao criar timeline:", error);
     container.innerHTML = `<div class="alert alert-danger">Erro: ${error.message}</div>`;
   }
 }
-// Funções para controle da timeline
+// Navegar para frente/atrás na timeline
 function moverTimeline(dias) {
   if (!appState.timeline) return;
 
   const range = appState.timeline.getWindow();
-
   appState.timeline.setWindow({
     start: moment(range.start).add(dias, "days").valueOf(),
     end: moment(range.end).add(dias, "days").valueOf(),
   });
 }
 
+// Ir para a data atual
 function irParaHoje() {
   if (!appState.timeline) return;
 
@@ -528,16 +337,13 @@ function irParaHoje() {
   });
 }
 
+// Ajustar zoom da timeline
 function ajustarZoom(fator) {
   if (!appState.timeline) return;
 
   const range = appState.timeline.getWindow();
-  const start = new Date(range.start);
-  const end = new Date(range.end);
-  const intervalo = end - start;
-  const centro = new Date((end.getTime() + start.getTime()) / 2);
-
-  const novoIntervalo = intervalo / fator;
+  const centro = new Date((range.end.getTime() + range.start.getTime()) / 2);
+  const novoIntervalo = (range.end - range.start) / fator;
 
   appState.timeline.setWindow({
     start: new Date(centro.getTime() - novoIntervalo / 2),
@@ -545,7 +351,7 @@ function ajustarZoom(fator) {
   });
 }
 
-// Exporta dados filtrados para CSV
+// Exportar os dados para CSV
 function exportarCSV() {
   if (!appState.filteredData || appState.filteredData.length === 0) {
     mostrarNotificacao("Exportação", "Não há dados para exportar.", "warning");
@@ -553,49 +359,43 @@ function exportarCSV() {
   }
 
   const headers = [
-    "Cliente", "Projeto", "Tarefa", 
+    "Cliente", "Projeto", "Tarefa",
     "Data Início", "Data Fim", "Responsável",
-    "Grupo", "Subgrupo", "Prioridade"
+    "Grupo", "Subgrupo", "Membro", "Prioridade"
   ];
 
   const linhas = appState.filteredData.map(item => [
-    item.client || "Não definido",
-    item.project || "Não definido",
+    item.client || "N/A",
+    item.project || "N/A",
     item.name || "Sem título",
     item.start ? moment(item.start).format("DD/MM/YYYY") : "-",
     item.end ? moment(item.end).format("DD/MM/YYYY") : "-",
-    item.responsible || "Não definido",
-    item.TaskOwnerGroup || "Não definido",
-    item.TaskOwnerSubgroup || "Não definido",
-    item.Priority === "high" ? "Alta" : 
-    item.Priority === "medium" ? "Média" : "Baixa"
+    item.responsible || "N/A",
+    item.TaskOwnerGroup || "N/A",
+    item.TaskOwnerSubgroup || "N/A",
+    item.TaskOwnerMember || "N/A",
+    item.Priority === "high" ? "Alta" : item.Priority === "medium" ? "Média" : "Baixa"
   ]);
 
   const csvContent = [
     headers.join(","),
-    ...linhas.map(linha => linha.map(campo => `"${campo}"`).join(","))
+    ...linhas.map(row => row.map(cell => `"${cell}"`).join(","))
   ].join("\n");
 
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-
-  link.setAttribute("href", url);
+  link.href = URL.createObjectURL(blob);
   link.setAttribute("download", `tarefas_${moment().format("YYYY-MM-DD")}.csv`);
   link.style.visibility = "hidden";
-  
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
-  mostrarNotificacao(
-    "Exportação concluída",
-    `${appState.filteredData.length} tarefas exportadas com sucesso.`,
-    "success"
-  );
+  mostrarNotificacao("Exportação", "Arquivo CSV gerado com sucesso!", "success");
 }
 
-// Configura o evento de tela cheia para a timeline
+// Tela cheia
 function configurarEventoTelaCheia() {
   const btnFullscreen = document.getElementById("btn-fullscreen");
   const timelineCard = document.querySelector(".cronograma-card");
@@ -604,113 +404,72 @@ function configurarEventoTelaCheia() {
 
   btnFullscreen.addEventListener("click", () => {
     if (!document.fullscreenElement) {
-      // Entra em tela cheia
-      if (timelineCard.requestFullscreen) {
-        timelineCard.requestFullscreen();
-      } else if (timelineCard.webkitRequestFullscreen) {
-        timelineCard.webkitRequestFullscreen();
-      } else if (timelineCard.msRequestFullscreen) {
-        timelineCard.msRequestFullscreen();
-      }
-
-      // Ajusta altura da timeline
-      if (appState.timeline) {
-        setTimeout(() => {
-          const altura = window.innerHeight - 150;
-          document.getElementById("timeline").style.height = `${altura}px`;
-          appState.timeline.redraw();
-        }, 100);
-      }
+      (timelineCard.requestFullscreen || timelineCard.webkitRequestFullscreen || timelineCard.msRequestFullscreen).call(timelineCard);
     } else {
-      // Sai da tela cheia
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-
-      // Restaura altura original
-      setTimeout(() => {
-        document.getElementById("timeline").style.height = "800px";
-        appState.timeline.redraw();
-      }, 100);
+      (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen).call(document);
     }
+
+    setTimeout(() => {
+      document.getElementById("timeline").style.height = document.fullscreenElement ? `${window.innerHeight - 150}px` : "800px";
+      appState.timeline.redraw();
+    }, 100);
   });
 
-  // Detecta saída do modo tela cheia
   document.addEventListener("fullscreenchange", () => {
-    if (!document.fullscreenElement) {
-      document.getElementById("timeline").style.height = "800px";
-      if (appState.timeline) appState.timeline.redraw();
-    }
+    document.getElementById("timeline").style.height = document.fullscreenElement ? `${window.innerHeight - 150}px` : "800px";
+    appState.timeline.redraw();
   });
 }
 
-// Funções utilitárias
-// Exibe/oculta indicadores de carregamento
-function mostrarLoading(mostrar) {
-  appState.isLoading = mostrar;
-
-  // Atualiza a UI para indicar estado de carregamento
-  const timelineContainer = document.getElementById("timeline");
-
-  if (mostrar && timelineContainer) {
-    // Mostra loading
-    timelineContainer.innerHTML = `
-        <div class="loading-container">
-          <div class="loading-spinner"></div>
-          <p class="mt-3">Carregando dados...</p>
-        </div>
-      `;
-  }
-}
-
-// Exibe uma notificação toast
+// Toast de notificação
 function mostrarNotificacao(titulo, mensagem, tipo = "info") {
-  // Cria container de toasts se não existir
-  let toastContainer = document.querySelector(".toast-container");
-  if (!toastContainer) {
-    toastContainer = document.createElement("div");
-    toastContainer.className =
-      "toast-container position-fixed bottom-0 end-0 p-3";
-    toastContainer.style.zIndex = "1050";
-    document.body.appendChild(toastContainer);
+  let container = document.querySelector(".toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "toast-container position-fixed bottom-0 end-0 p-3";
+    container.style.zIndex = "1050";
+    document.body.appendChild(container);
   }
 
-  // Cria o elemento toast
-  const toastId = "toast-" + Date.now();
-  const toastHTML = `
-      <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header ${
-          tipo === "error"
-            ? "bg-danger text-white"
-            : tipo === "success"
-            ? "bg-success text-white"
-            : tipo === "warning"
-            ? "bg-warning"
-            : "bg-info text-white"
-        }">
-          <strong class="me-auto">${titulo}</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          ${mensagem}
-        </div>
+  const toastId = `toast-${Date.now()}`;
+  const html = `
+    <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header ${tipo === "error" ? "bg-danger text-white" :
+        tipo === "success" ? "bg-success text-white" :
+        tipo === "warning" ? "bg-warning" :
+        "bg-info text-white"}">
+        <strong class="me-auto">${titulo}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
       </div>
-    `;
+      <div class="toast-body">${mensagem}</div>
+    </div>
+  `;
 
-  // Adiciona à página
-  toastContainer.insertAdjacentHTML("beforeend", toastHTML);
-
-  // Inicializa o toast
+  container.insertAdjacentHTML("beforeend", html);
   const toastElement = document.getElementById(toastId);
-  const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-  toast.show();
+  new bootstrap.Toast(toastElement, { delay: 5000 }).show();
 
-  // Remove após fechar
   toastElement.addEventListener("hidden.bs.toast", () => {
     toastElement.remove();
   });
 }
+
+function mostrarLoading(mostrar) {
+  appState.isLoading = mostrar;
+
+  const container = document.getElementById("timeline");
+  if (!container) return;
+
+  if (mostrar) {
+    container.innerHTML = `
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p class="mt-3">Carregando dados...</p>
+      </div>
+    `;
+  }
+}
+
+
+
+
