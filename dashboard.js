@@ -356,22 +356,25 @@ function criarTimeline(dados) {
   }
 
   try {
-    // Agrupar por responsável real (não pelo caminho)
+    // Agrupar por responsável
     const responsaveis = [...new Set(dados.map(t => t.responsible).filter(Boolean))].sort();
 
     const items = new vis.DataSet(dados.map((item, idx) => {
       const startDate = moment(item.start);
       const endDate = item.end ? moment(item.end) : startDate.clone().add(3, "days");
 
+      const isSubtask = item.tipo === "Subtarefa";
+      const titlePrefix = isSubtask ? "↳ " : "";
+
       return {
         id: idx,
-        content: `<div class="timeline-item-content" title="${item.name}">
+        content: `<div class="timeline-item-content ${isSubtask ? 'subtask' : ''}" title="${item.name}">
                     <span class="priority-dot ${CONFIG.priorityClasses[item.Priority]}"></span>
-                    ${item.name.substring(0, 25)}${item.name.length > 25 ? "..." : ""}
+                    ${titlePrefix}${item.name.substring(0, 25)}${item.name.length > 25 ? "..." : ""}
                   </div>`,
         start: startDate.toDate(),
         end: endDate.toDate(),
-        group: item.responsible, // Agrupar por responsável real
+        group: item.responsible,
         title: `
           <div class="timeline-tooltip">
             <h5>${item.name}</h5>
@@ -380,6 +383,7 @@ function criarTimeline(dados) {
             <p><strong>Período:</strong> ${startDate.format("DD/MM/YYYY")} - ${endDate.format("DD/MM/YYYY")}</p>
             <p><strong>Status:</strong> ${item.PipelineStepTitle || "N/A"}</p>
             <p><strong>Grupo:</strong> ${item.TaskOwnerFullPath || "N/A"}</p>
+            <p><strong>Tipo:</strong> ${item.tipo || "Tarefa"}</p>
           </div>`
       };
     }));
@@ -410,6 +414,7 @@ function criarTimeline(dados) {
     container.innerHTML = `<div class="alert alert-danger">Erro: ${error.message}</div>`;
   }
 }
+
 // Navegar para frente/atrás na timeline
 function moverTimeline(dias) {
   if (!appState.timeline) return;

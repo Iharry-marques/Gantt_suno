@@ -432,3 +432,9 @@ select option {
   margin: 0 0 8px 0;
   color: var(--primary-color);
 }
+
+.timeline-item-content.subtask {
+  margin-left: 20px;
+  font-style: italic;
+  opacity: 0.85;
+}
