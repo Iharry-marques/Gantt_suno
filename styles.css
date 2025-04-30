@@ -1,9 +1,10 @@
 /**
  * Dashboard de Tarefas - SUNO
- * styles.css - Estilos compartilhados
+ * styles.css - Estilos reorganizados e otimizados
  */
 
- :root {
+/* Variáveis */
+:root {
   --primary-color: #ffc801;
   --accent-color: #ffc801;
   --text-color: #333333;
@@ -15,6 +16,8 @@
   --hover-color: #f0f0f0;
   --subtask-color: #efefef;
 }
+
+/* ========== ESTILOS BÁSICOS ========== */
 
 /* Estilos Gerais */
 body {
@@ -96,10 +99,6 @@ body {
   background-color: var(--card-bg);
 }
 
-.filtro-group {
-  min-width: 200px;
-}
-
 .timeline-container {
   height: 800px;
   background-color: var(--card-bg);
@@ -141,7 +140,9 @@ body {
   gap: 0.5rem;
 }
 
-/* Estados e Indicadores */
+/* ========== COMPONENTES ========== */
+
+/* Indicadores de Estado */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -160,19 +161,15 @@ body {
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .text-accent {
   color: var(--accent-color) !important;
 }
 
-/* Cores de Prioridade */
+/* Indicadores de Prioridade */
 .priority-dot {
   display: inline-block;
   width: 12px;
@@ -180,154 +177,39 @@ body {
   border-radius: 50%;
 }
 
-.priority-high {
-  background-color: var(--priority-high) !important;
+.priority-high, .priority-dot.high { 
+  background-color: var(--priority-high) !important; 
 }
 
-.priority-medium {
-  background-color: var(--priority-medium) !important;
+.priority-medium, .priority-dot.medium { 
+  background-color: var(--priority-medium) !important; 
 }
 
-.priority-low {
-  background-color: var(--priority-low) !important;
+.priority-low, .priority-dot.low { 
+  background-color: var(--priority-low) !important; 
 }
 
-.vis-item {
-  border-radius: 999px !important;
-  overflow: visible !important;
-  border-width: 0;
-  font-family: "Inter", sans-serif;
-  font-size: 0.85rem;
+/* Filtros e Opções */
+.filtro-group {
+  min-width: 200px;
 }
 
-.vis-item .vis-item-content {
-    border-radius: 999px !important; /* Garante arredondamento interno */
-    padding: 6px 16px;
-    overflow: visible !important;
+.task-type-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.vis-item.task-priority-high {
-  background-color: var(--priority-high);
-  border-color: var(--priority-high);
-  color: white;
-  box-shadow: 0 2px 4px rgba(255, 65, 54, 0.2);
+.task-type-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 10px;
 }
 
-.vis-item.task-priority-medium {
-  background-color: var(--priority-medium);
-  border-color: var(--priority-medium);
-  color: #333;
-  box-shadow: 0 2px 4px rgba(255, 220, 0, 0.2);
-}
-
-.vis-item.task-priority-low {
-  background-color: var(--priority-low);
-  border-color: var(--priority-low);
-  color: white;
-  box-shadow: 0 2px 4px rgba(46, 204, 64, 0.2);
-}
-
-/* Estilos para subtarefas */
-.vis-item.subtask {
-  border-style: dashed !important;
-  border-width: 1px !important;
-  opacity: 0.9;
-}
-
-.vis-item.subtask .vis-item-content {
-  font-style: italic;
-  padding-left: 24px;
-}
-
-.vis-item.subtask.task-priority-high {
-  background-color: rgba(255, 65, 54, 0.85);
-}
-
-.vis-item.subtask.task-priority-medium {
-  background-color: rgba(255, 220, 0, 0.85);
-}
-
-.vis-item.subtask.task-priority-low {
-  background-color: rgba(46, 204, 64, 0.85);
-}
-
-.vis-item .vis-item-content {
-    border-radius: 999px;
-    padding: 6px 16px;
-}  
-
-.vis-item.vis-selected {
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 3px rgba(255, 200, 1, 0.5);
-}
-
-.vis-time-axis .vis-text {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.vis-group-label {
-  font-weight: 600;
-}
-
-.vis-tooltip {
-  border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  background-color: white;
-  border: none;
-  padding: 10px;
-  font-family: "Inter", sans-serif;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-/* Status de projeto */
-.projeto-status {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-align: center;
-  min-width: 100px;
-}
-
-.status-concluido {
-  background-color: var(--priority-low);
-  color: white;
-}
-
-.status-andamento {
-  background-color: var(--priority-medium);
-  color: #333;
-}
-
-.status-atrasado {
-  background-color: var(--priority-high);
-  color: white;
-}
-
-/* Cores para clientes */
-.cliente-sicredi {
-  color: #dc3545 !important;
-}
-.cliente-samsung {
-  color: #0d6efd !important;
-}
-.cliente-vivo {
-  color: #198754 !important;
-}
-.cliente-rd {
-  color: #ffc107 !important;
-}
-.cliente-americanas {
-  color: #0dcaf0 !important;
-}
-.cliente-oboticario {
-  color: #212529 !important;
-}
-.cliente-cogna {
-  color: #6c757d !important;
+.task-type-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 
 /* Legenda */
@@ -353,24 +235,29 @@ body {
   border-radius: 4px;
 }
 
-/* Tabela de projetos */
-.table-container {
-  overflow-x: auto;
+.task-indicator {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
 }
 
-.table {
-  font-size: 0.9rem;
+.subtask-indicator {
+  border: 1px dashed #333;
+  opacity: 0.85;
 }
 
-.table > thead {
+/* Estilos para hierarquia */
+select option[disabled] {
+  font-weight: 600;
   background-color: #f8f9fa;
 }
 
-.table > tbody > tr:hover {
-  background-color: rgba(255, 200, 1, 0.05);
+select option {
+  padding-left: 20px !important;
 }
 
-/* Toast Notifications */
+/* Notificações */
 .toast-container {
   position: fixed;
   bottom: 1rem;
@@ -386,187 +273,106 @@ body {
   margin-top: auto;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .filtro-group {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
+/* ========== TIMELINE VIS.JS ========== */
 
-  .timeline-container {
-    height: 500px;
-  }
-
-  .timeline-controls {
-    flex-wrap: wrap;
-  }
-}
-
-/* Estilos para hierarquia de grupos */
-select option[disabled] {
-  font-weight: 600;
-  background-color: #f8f9fa;
-}
-
-select option {
-  padding-left: 20px !important;
-}
-
-/* Ícones de grupos */
-.group-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-}
-
-.group-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: var(--accent-color);
-  color: white;
-  font-weight: bold;
-}
-
-/* Timeline items */
-.timeline-item-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px;
-  border-radius: 16px;
-}
-
-.priority-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.priority-dot.high { background-color: var(--priority-high); }
-.priority-dot.medium { background-color: var(--priority-medium); }
-.priority-dot.low { background-color: var(--priority-low); }
-
-/* Tooltip customizado */
-.timeline-tooltip {
-  max-width: 300px;
-  padding: 12px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.timeline-tooltip h5 {
-  margin: 0 0 8px 0;
-  color: var(--primary-color);
-}
-
-.timeline-item-content.subtask {
-  margin-left: 20px;
-  font-style: italic;
-  opacity: 0.85;
-}
-
-/* Filtro de tipo de tarefa */
-.task-type-filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.task-type-checkbox {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-right: 10px;
-}
-
-.task-type-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-}
-
-/* Indicador de subtarefa na legenda */
-.task-indicator {
-  position: relative;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-}
-
-.subtask-indicator {
-  border: 1px dashed #333;
-  opacity: 0.85;
-}
-
+/* Estilos básicos de itens da timeline */
 .vis-item {
   border-radius: 999px !important;
-  overflow: visible !important;
-  border-width: 0;
+  border-width: 0 !important;
   font-family: "Inter", sans-serif;
   font-size: 0.85rem;
-  transition: all 0.3s ease;
-  min-width: 80px; /* Largura mínima para tarefas pequenas */
-  cursor: pointer;
+  min-width: 80px;
+  cursor: pointer !important;
+  overflow: visible !important;
+  z-index: 2;
+  box-sizing: border-box !important;
 }
 
 .vis-item .vis-item-content {
-    border-radius: 999px !important; /* Garante arredondamento interno */
-    padding: 6px 16px;
-    overflow: visible !important;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+  border-radius: 999px !important;
+  padding: 6px 16px !important;
+  overflow: visible !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* Estilo para tarefas de curta duração */
+/* Prioridades de tarefas */
+.vis-item.task-priority-high {
+  background-color: var(--priority-high) !important;
+  border-color: var(--priority-high) !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(255, 65, 54, 0.2);
+}
+
+.vis-item.task-priority-medium {
+  background-color: var(--priority-medium) !important;
+  border-color: var(--priority-medium) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 4px rgba(255, 220, 0, 0.2);
+}
+
+.vis-item.task-priority-low {
+  background-color: var(--priority-low) !important;
+  border-color: var(--priority-low) !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(46, 204, 64, 0.2);
+}
+
+/* Seleção e hover */
+.vis-item.vis-selected {
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(255, 200, 1, 0.5) !important;
+  z-index: 10 !important;
+}
+
+.vis-item:hover {
+  z-index: 5 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Subtarefas */
+.vis-item.subtask {
+  border-style: dashed !important;
+  border-width: 1px !important;
+  opacity: 0.9;
+}
+
+.vis-item.subtask .vis-item-content {
+  font-style: italic;
+  padding-left: 24px !important;
+}
+
+.vis-item.subtask.task-priority-high {
+  background-color: rgba(255, 65, 54, 0.85) !important;
+}
+
+.vis-item.subtask.task-priority-medium {
+  background-color: rgba(255, 220, 0, 0.85) !important;
+}
+
+.vis-item.subtask.task-priority-low {
+  background-color: rgba(46, 204, 64, 0.85) !important;
+}
+
+/* Tarefas de curta duração */
 .vis-item.short-duration {
-  height: 32px !important; /* Altura aumentada */
+  height: 32px !important;
   min-width: 32px !important;
   border-radius: 50% !important;
 }
 
-/* Estilo para tarefa expandida */
-.vis-item.expanded {
-  z-index: 100 !important; /* Garante que fique por cima de tudo */
-  height: auto !important;
-  min-height: 36px;
-  min-width: auto !important;
-  max-width: none !important;
-  width: auto !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-radius: 12px !important;
-  border: 2px solid var(--primary-color) !important;
+/* Tooltip da timeline */
+.vis-tooltip {
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border: none;
+  padding: 10px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-.vis-item.expanded .vis-item-content {
-  white-space: normal !important;
-  overflow: visible !important;
-  word-wrap: break-word;
-  line-height: 1.4;
-  border-radius: 10px !important;
-  padding: 8px 16px;
-}
-
-/* Ajustes para o texto dentro de itens expandidos */
-.vis-item.expanded .timeline-item-content {
-  white-space: normal;
-  word-break: break-word;
-  display: block;
-  width: 100%;
-}
-
-/* Certificar que as tarefas curtas expandem corretamente */
-.vis-item.short-duration.expanded {
-  border-radius: 12px !important;
-  padding: 0 !important;
-}
-
-
-/* Tooltip customizado */
 .timeline-tooltip {
   max-width: 300px;
   padding: 12px;
@@ -592,13 +398,94 @@ select option {
   color: #444;
 }
 
-/* Estilos específicos baseados no exemplo da imagem */
 .timeline-tooltip p:first-of-type {
   border-bottom: 1px solid #eee;
   padding-bottom: 6px;
 }
 
-/* Estilo para tarefas pequenas (formato de ponto) */
+/* Elementos de texto gerais */
+.vis-time-axis .vis-text {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.vis-group-label {
+  font-weight: 600;
+}
+
+/* ========== EXPANDED ITEMS (IMPORTANTE) ========== */
+
+/* Este é o seletor principal para itens expandidos */
+.vis-foreground .vis-item.expanded,
+.vis-content .vis-item.expanded,
+.vis-timeline .vis-item.expanded,
+.vis-item.expanded {
+  /* Configuração de posicionamento e z-index */
+  position: absolute !important;
+  z-index: 1000 !important;
+  
+  /* Dimensões e formato */
+  min-height: 36px !important;
+  min-width: 200px !important;
+  max-width: none !important;
+  width: auto !important;
+  border-radius: 12px !important;
+  
+  /* Aparência */
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  background-color: white !important;
+  
+  /* Estado do item */
+  pointer-events: auto !important;
+  overflow: visible !important;
+}
+
+/* Conteúdo dentro dos itens expandidos */
+.vis-item.expanded .vis-item-content,
+.vis-item.expanded .timeline-item-content,
+.vis-item.expanded .full-content {
+  white-space: normal !important;
+  overflow: visible !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  text-overflow: clip !important;
+  line-height: 1.4 !important;
+  border-radius: 10px !important;
+  padding: 8px 16px !important;
+  display: block !important;
+  width: auto !important;
+  min-width: 180px !important;
+  height: auto !important;
+  font-size: 0.95rem !important;
+  color: #333 !important;
+}
+
+/* Para tarefas curtas quando expandidas */
+.vis-item.short-duration.expanded {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  min-width: 200px !important;
+  min-height: 36px !important;
+  height: auto !important;
+  width: auto !important;
+}
+
+/* Fundo semi-transparente para garantir legibilidade */
+.vis-item.expanded::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  border-radius: 12px;
+  background-color: white;
+  opacity: 0.98;
+}
+
+/* Estilos específicos para os pontos indicadores */
 .task-dot {
   display: inline-block;
   width: 20px;
@@ -615,12 +502,24 @@ select option {
   border: 1px dashed #333;
 }
 
-/* Estilo para o conteúdo completo quando expandido */
-.full-content {
-  padding: 6px 12px;
-  width: 100%;
-  line-height: 1.4;
-  word-break: break-word;
-  white-space: normal;
-  font-size: 0.95rem;
+/* ========== RESPONSIVIDADE ========== */
+
+@media (max-width: 768px) {
+  .filtro-group {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-container {
+    height: 500px;
+  }
+
+  .timeline-controls {
+    flex-wrap: wrap;
+  }
+  
+  /* Tarefas expandidas em telas menores */
+  .vis-item.expanded {
+    max-width: 300px !important;
+  }
 }
