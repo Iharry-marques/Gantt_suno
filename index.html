@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard de Projetos | SOMOS • CREATORS</title>
+  <title>Dashboard de Projetos | SUNO</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>•</text></svg>">
   <!-- Fontes e Bibliotecas -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,6 +21,7 @@
       <div class="container-fluid d-flex justify-content-between align-items-center">
         <div class="logo-container">
           <div class="logo-circle"></div>
+          <div class="logo-text">SUNO</div>
         </div>
         <div class="d-flex gap-3">
           <a href="index.html" class="nav-link active"><i class="fas fa-users me-1"></i> Por Equipe</a>
@@ -59,12 +60,25 @@
                 </select>
               </div>
               <div class="filtro-group">
+                <label for="tipo-tarefa" class="form-label">Tipo de Tarefa</label>
+                <div class="task-type-filter">
+                  <div class="task-type-checkbox">
+                    <input type="checkbox" id="mostrar-tarefas" checked>
+                    <label for="mostrar-tarefas">Tarefas</label>
+                  </div>
+                  <div class="task-type-checkbox">
+                    <input type="checkbox" id="mostrar-subtarefas" checked>
+                    <label for="mostrar-subtarefas">Subtarefas</label>
+                  </div>
+                </div>
+              </div>
+              <div class="filtro-group">
                 <label for="periodo-select" class="form-label">Período</label>
                 <select id="periodo-select" class="form-select">
-                  <option value="30"selected>30 dias</option>
+                  <option value="30" selected>30 dias</option>
                   <option value="90">90 dias</option>
                   <option value="180">6 meses</option>
-                  <option value="365" >1 ano</option>
+                  <option value="365">1 ano</option>
                 </select>
               </div>
               <div class="d-flex">
@@ -81,6 +95,7 @@
         <div class="legend-item"><div class="legend-color" style="background-color: var(--priority-high);"></div><span>Prioridade Alta</span></div>
         <div class="legend-item"><div class="legend-color" style="background-color: var(--priority-medium);"></div><span>Prioridade Média</span></div>
         <div class="legend-item"><div class="legend-color" style="background-color: var(--priority-low);"></div><span>Prioridade Baixa</span></div>
+        <div class="legend-item"><div class="task-indicator subtask-indicator"></div><span>Subtarefa</span></div>
       </div>
 
       <div class="row">
@@ -115,7 +130,7 @@
 
     <footer class="app-footer">
       <div class="container-fluid text-center">
-        <p class="mb-0">SOMOS <span class="text-accent">•</span> CREATORS &copy; <span id="ano-atual">2025</span></p>
+        <p class="mb-0">SUNO &copy; <span id="ano-atual">2025</span></p>
       </div>
     </footer>
   </div>

@@ -1,3 +1,7 @@
+/**
+ * Dashboard de Tarefas - SUNO
+ * dashboard.js - Script principal para visualização por equipe
+ */
 
 const CONFIG = {
   clientColors: {
@@ -63,6 +67,10 @@ function setupEventListeners() {
     atualizarFiltros();
   });
   document.getElementById("subgrupo-select")?.addEventListener("change", atualizarFiltros);
+  
+  // Novos event listeners para filtros de tipo de tarefa
+  document.getElementById("mostrar-tarefas")?.addEventListener("change", atualizarFiltros);
+  document.getElementById("mostrar-subtarefas")?.addEventListener("change", atualizarFiltros);
 
   configurarEventoTelaCheia();
 }
@@ -170,8 +178,12 @@ function preprocessarDados(item) {
   processado.TaskClosingDate = processado.end || moment(processado.RequestDate).add(3, 'days').toISOString();
   processado.CurrentDueDate = processado.TaskClosingDate;
 
+  // Garantir que o campo tipo esteja sempre definido (para distinguir tarefas de subtarefas)
+  processado.tipo = processado.tipo || "Tarefa";
+
   return processado;
 }
+
 // Preenche os selects de Grupo Principal e Cliente
 function preencherFiltros() {
   if (!appState.allData || appState.allData.length === 0) return;
@@ -285,7 +297,6 @@ function atualizarSubgrupos() {
   }
 }
 
-// Início de atualizarFiltros() — (continua na Parte 3)
 function atualizarFiltros() {
   if (!appState.allData || appState.allData.length === 0) return;
 
@@ -293,6 +304,8 @@ function atualizarFiltros() {
   const dias = parseInt(document.getElementById("periodo-select").value);
   const grupo = document.getElementById("grupo-principal-select").value;
   const subgrupo = document.getElementById("subgrupo-select").value;
+  const mostrarTarefas = document.getElementById("mostrar-tarefas").checked;
+  const mostrarSubtarefas = document.getElementById("mostrar-subtarefas").checked;
 
   const limite = moment().subtract(dias, "days");
 
@@ -340,6 +353,16 @@ function atualizarFiltros() {
     });
   }
 
+  // Filtrar por tipo de tarefa (novo)
+  if (!mostrarTarefas || !mostrarSubtarefas) {
+    appState.filteredData = appState.filteredData.filter(item => {
+      const isSubtask = item.tipo === "Subtarefa";
+      if (!mostrarTarefas && !isSubtask) return false;
+      if (!mostrarSubtarefas && isSubtask) return false;
+      return true;
+    });
+  }
+
   // Agrupar por responsável e criar a timeline
   criarTimeline(appState.filteredData);
 }
@@ -365,6 +388,7 @@ function criarTimeline(dados) {
 
       const isSubtask = item.tipo === "Subtarefa";
       const titlePrefix = isSubtask ? "↳ " : "";
+      const taskClass = CONFIG.priorityClasses[item.Priority] || "";
 
       return {
         id: idx,
@@ -384,7 +408,8 @@ function criarTimeline(dados) {
             <p><strong>Status:</strong> ${item.PipelineStepTitle || "N/A"}</p>
             <p><strong>Grupo:</strong> ${item.TaskOwnerFullPath || "N/A"}</p>
             <p><strong>Tipo:</strong> ${item.tipo || "Tarefa"}</p>
-          </div>`
+          </div>`,
+        className: `${taskClass} ${isSubtask ? 'subtask' : ''}`
       };
     }));
 
@@ -462,7 +487,7 @@ function exportarCSV() {
   }
 
   const headers = [
-    "Cliente", "Projeto", "Tarefa",
+    "Cliente", "Projeto", "Tarefa", "Tipo",
     "Data Início", "Data Fim", "Responsável",
     "Grupo", "Subgrupo", "Membro", "Prioridade"
   ];
@@ -471,6 +496,7 @@ function exportarCSV() {
     item.client || "N/A",
     item.project || "N/A",
     item.name || "Sem título",
+    item.tipo || "Tarefa",
     item.start ? moment(item.start).format("DD/MM/YYYY") : "-",
     item.end ? moment(item.end).format("DD/MM/YYYY") : "-",
     item.responsible || "N/A",
@@ -572,7 +598,3 @@ function mostrarLoading(mostrar) {
     `;
   }
 }
-
-
-
-

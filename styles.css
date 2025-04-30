@@ -1,11 +1,11 @@
 /**
- * Dashboard de Tarefas - SOMOS CREATORS
+ * Dashboard de Tarefas - SUNO
  * styles.css - Estilos compartilhados
  */
 
-:root {
-  --primary-color: #ffd700;
-  --accent-color: #ffc107;
+ :root {
+  --primary-color: #ffc801;
+  --accent-color: #ffc801;
   --text-color: #333333;
   --bg-color: #ffffff;
   --card-bg: #ffffff;
@@ -13,6 +13,7 @@
   --priority-medium: #ffdc00;
   --priority-low: #2ecc40;
   --hover-color: #f0f0f0;
+  --subtask-color: #efefef;
 }
 
 /* Estilos Gerais */
@@ -41,6 +42,7 @@ body {
 .logo-container {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .logo-circle {
@@ -48,6 +50,12 @@ body {
   height: 30px;
   border-radius: 50%;
   background-color: var(--primary-color);
+}
+
+.logo-text {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: white;
 }
 
 .nav-link {
@@ -159,7 +167,7 @@ body {
     transform: rotate(360deg);
   }
 }
-d
+
 .text-accent {
   color: var(--accent-color) !important;
 }
@@ -219,6 +227,30 @@ d
   box-shadow: 0 2px 4px rgba(46, 204, 64, 0.2);
 }
 
+/* Estilos para subtarefas */
+.vis-item.subtask {
+  border-style: dashed !important;
+  border-width: 1px !important;
+  opacity: 0.9;
+}
+
+.vis-item.subtask .vis-item-content {
+  font-style: italic;
+  padding-left: 24px;
+}
+
+.vis-item.subtask.task-priority-high {
+  background-color: rgba(255, 65, 54, 0.85);
+}
+
+.vis-item.subtask.task-priority-medium {
+  background-color: rgba(255, 220, 0, 0.85);
+}
+
+.vis-item.subtask.task-priority-low {
+  background-color: rgba(46, 204, 64, 0.85);
+}
+
 .vis-item .vis-item-content {
     border-radius: 999px;
     padding: 6px 16px;
@@ -226,7 +258,7 @@ d
 
 .vis-item.vis-selected {
   border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 0 3px rgba(255, 209, 0, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 200, 1, 0.5);
 }
 
 .vis-time-axis .vis-text {
@@ -335,7 +367,7 @@ d
 }
 
 .table > tbody > tr:hover {
-  background-color: rgba(255, 220, 0, 0.05);
+  background-color: rgba(255, 200, 1, 0.05);
 }
 
 /* Toast Notifications */
@@ -436,5 +468,37 @@ select option {
 .timeline-item-content.subtask {
   margin-left: 20px;
   font-style: italic;
+  opacity: 0.85;
+}
+
+/* Filtro de tipo de tarefa */
+.task-type-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-type-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 10px;
+}
+
+.task-type-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* Indicador de subtarefa na legenda */
+.task-indicator {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.subtask-indicator {
+  border: 1px dashed #333;
   opacity: 0.85;
 }
