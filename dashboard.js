@@ -385,10 +385,15 @@ function criarTimeline(dados) {
     const items = new vis.DataSet(dados.map((item, idx) => {
       const startDate = moment(item.start);
       const endDate = item.end ? moment(item.end) : startDate.clone().add(3, "days");
+      
+      // Verificar se é uma tarefa de curta duração (menos de 24 horas)
+      const isShortDuration = endDate.diff(startDate, 'hours') <= 24 || 
+                              startDate.format('YYYY-MM-DD') === endDate.format('YYYY-MM-DD');
 
       const isSubtask = item.tipo === "Subtarefa";
       const titlePrefix = isSubtask ? "↳ " : "";
       const taskClass = CONFIG.priorityClasses[item.Priority] || "";
+      const shortDurationClass = isShortDuration ? "short-duration" : "";
 
       return {
         id: idx,
@@ -409,7 +414,7 @@ function criarTimeline(dados) {
             <p><strong>Grupo:</strong> ${item.TaskOwnerFullPath || "N/A"}</p>
             <p><strong>Tipo:</strong> ${item.tipo || "Tarefa"}</p>
           </div>`,
-        className: `${taskClass} ${isSubtask ? 'subtask' : ''}`
+        className: `${taskClass} ${isSubtask ? 'subtask' : ''} ${shortDurationClass}`
       };
     }));
 
@@ -434,6 +439,24 @@ function criarTimeline(dados) {
 
     appState.timeline = new vis.Timeline(container, items, visGroups, options);
     appState.timeline.fit();
+    
+    // Adicionar evento de clique para expandir/colapsar
+    container.addEventListener('click', (event) => {
+      const element = event.target.closest('.vis-item');
+      if (element) {
+        // Toggle da classe expanded
+        if (element.classList.contains('expanded')) {
+          element.classList.remove('expanded');
+        } else {
+          // Remover a classe expanded de todos os outros elementos
+          document.querySelectorAll('.vis-item.expanded').forEach(el => {
+            if (el !== element) el.classList.remove('expanded');
+          });
+          element.classList.add('expanded');
+        }
+      }
+    });
+    
   } catch (error) {
     console.error("Erro ao criar timeline:", error);
     container.innerHTML = `<div class="alert alert-danger">Erro: ${error.message}</div>`;
